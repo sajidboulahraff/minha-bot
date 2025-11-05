@@ -1,21 +1,17 @@
 import time
+import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-import requests
+import undetected_chromedriver as uc
 
 # إعدادات التلغرام
 BOT_TOKEN = "7874668042:AAHPPkMFfwR85eNUK_SxzecGB1KHRsc4GFs"
 CHAT_ID = "911861074"
 TELEGRAM_URL = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
-# إعدادات المتصفح
-driver_path = "chromedriver.exe"
+# إعدادات الموقع
 url = "https://minha.anem.dz/pre_inscription"
-
-chrome_options = Options()
-chrome_options.add_argument("--start-maximized")  # متصفح مرئي
 
 def send_telegram_message(message):
     """إرسال رسالة إلى تيلغرام"""
@@ -27,12 +23,20 @@ def send_telegram_message(message):
 def run_check():
     """تنفيذ الفحص"""
     try:
-        service = Service(driver_path)
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-        driver.get(url)
-        time.sleep(3)
+        # إعدادات Chrome بدون واجهة
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--window-size=1920,1080")
 
-        # إدخال المعلومات
+        # تشغيل المتصفح بدون الحاجة لتثبيت Chrome يدوياً
+        driver = uc.Chrome(options=chrome_options)
+        driver.get(url)
+        time.sleep(4)
+
+        # تعبئة البيانات الخاصة بك
         driver.find_element(By.ID, "numeroWassit").send_keys("121901007320")
         driver.find_element(By.ID, "numeroPieceIdentite").send_keys("100010385007320006")
         time.sleep(1)
@@ -59,9 +63,10 @@ def run_check():
         send_telegram_message(f"⚠️ حدث خطأ أثناء الفحص: {e}")
         print(f"⚠️ خطأ في البوت: {e}")
 
+# تكرار الفحص كل دقيقتين
 if __name__ == "__main__":
     while True:
         print("🔍 بدء الفحص...")
         run_check()
-        print("⏳ في انتظار 2 دقائق للفحص القادم...")
+        print("⏳ في انتظار دقيقتين للفحص القادم...")
         time.sleep(120)
